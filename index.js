@@ -18,10 +18,43 @@ app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
+const isInvalidDate = (date) => isNaN(date.getTime());
 
 // your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
+app.get("/api/:date?", function (req, res) {
+  let dateString = req.params.date;
+  let date;
+
+  if (!dateString) {
+    // Empty date parameter, return current time
+    date = new Date();
+  } else if (isNaN(Number(dateString))) {
+    // Non-numeric date parameter, parse as date string
+    date = new Date(dateString);
+  } else {
+    // Numeric date parameter, parse as UNIX timestamp
+    date = new Date(Number(dateString));
+  }
+
+  if (isInvalidDate(date)) {
+    res.json({ error: "Invalid Date" });
+    return;
+  }
+
+  res.json({
+    unix: date.getTime(),
+    utc: date.toUTCString()
+  });
+});
+
+app.get("/api", (req, res) => {
+  // Empty date parameter, return current time
+  const date = new Date();
+
+  res.json({
+    unix: date.getTime(),
+    utc: date.toUTCString()
+  });
 });
 
 
